@@ -8,7 +8,7 @@ from .serializers import MenuItemSerializer
 def getProducts(request):
     menuItems = MenuItem.objects.all()
     serializer = MenuItemSerializer(menuItems, many=True)
-    return Response(serializer.data)
+    return Response({"items": serializer.data})
 
 @api_view(['POST'])
 def addMenuItem(request):
