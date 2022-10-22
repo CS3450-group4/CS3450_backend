@@ -7,6 +7,7 @@ urlpatterns = [
         path('orders/', views.getOrders),
         path('orders/<int:id>/', views.getOrders),
         path('user/', views.createUser),
+        path('user/all', views.getAllUsers),
         path('user/<int:id>/', views.user),
         path('ingredient/', views.ingredient),
         path('ingredient/<int:id>/', views.ingredient),

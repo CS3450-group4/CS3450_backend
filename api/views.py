@@ -141,10 +141,16 @@ def user(request, id):
 
 @api_view(['POST'])
 def createUser(request):
-    serializer = UserSerializer(request.data)
+    serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data,
                 status=status.HTTP_201_CREATED)
     return Response(serializer.errors,
             status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def getAllUsers(request):
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
