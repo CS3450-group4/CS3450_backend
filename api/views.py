@@ -1,42 +1,53 @@
+from django.http import Http404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from rest_framework.views import APIView
 from base.models import MenuItem
 from .serializers import *
 
 
-@api_view(["GET", "POST", "DELETE", "PUT"])
-def menu(request, name=""):
-    if request.method == "GET":
-        menuItems = MenuItem.objects.all()
-        serializer = MenuItemSerializer(menuItems, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+class Menu(APIView):
+    def get_object_by_name(self, name):
+        try:
+            return MenuItem.objects.get(name=name)
+        except MenuItem.DoesNotExist:
+            raise Http404
 
-    elif request.method == "POST":
-        serializer = MenuItemSerializer(data=request.data)
+    def save_object_if_valid(self, serializer, good_status=status.HTTP_200_OK):
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=good_status)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    elif request.method == "DELETE":
-        try:
-            menuItem = MenuItem.objects.get(name=name)
-        except MenuItem.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        menuItem.delete()
-        return Response(status.HTTP_204_NO_CONTENT)
+    def get(self, request, name=""):
+        # if _ then get all else get named menuItem
+        if not name:
+            menuItems = MenuItem.objects.all()
+            serializer = MenuItemSerializer(menuItems, many=True)
+        else:
+            menuItems = MenuItem.objects.get(name=name)
+            serializer = MenuItemSerializer(menuItems)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    elif request.method == "PUT":
-        try:
-            menuItem = MenuItem.objects.get(name=name)
-        except MenuItem.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+    def post(self, request):
+        serializer = MenuItemSerializer(data=request.data)
+        return self.save_object_if_valid(
+            serializer, good_status=status.HTTP_201_CREATED
+        )
+
+    def put(self, request, name):
+        menuItem = self.get_object_by_name(name)
         serializer = MenuItemSerializer(menuItem, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, name):
+        menuItem = self.get_object_by_name(name)
+        menuItem.delete()
+        return Response(status.HTTP_204_NO_CONTENT)
 
 
 @api_view(["GET", "POST", "PUT"])
