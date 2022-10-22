@@ -50,30 +50,31 @@ class Menu(APIView):
         return Response(status.HTTP_204_NO_CONTENT)
 
 
-@api_view(["GET", "POST", "PUT"])
-def getOrders(request, id=""):
-    if request.method == "GET":
+class Orders(APIView):
+    def save_object_if_valid(self, serializer, good_status=status.HTTP_200_OK):
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=good_status)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request):
         orders = Order.objects.filter(orderStatus="unfullfilled")
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
 
-    elif request.method == "POST":
+    def post(self, request):
         serializer = OrderSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return self.save_object_if_valid(
+            serializer, good_status=status.HTTP_201_CREATED
+        )
 
-    elif request.method == "PUT":
+    def put(self, request, id):
         try:
             order = Order.objects.get(id=id)
         except Order.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = OrderSerializer(order, request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return self.save_object_if_valid(serializer)
 
 
 @api_view(["GET", "POST", "PUT", "DELETE"])
