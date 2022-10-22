@@ -11,6 +11,9 @@ urlpatterns = [
     path("orders/<int:id>/", views.Orders.as_view(http_method_names=["put"])),
     path("user/", views.createUser),
     path("user/<int:id>/", views.user),
-    path("ingredient/", views.ingredient),
-    path("ingredient/<int:id>/", views.ingredient),
+    path("ingredient/", views.Ingredients.as_view(http_method_names=["get", "post"])),
+    path(
+        "ingredient/<int:id>/",
+        views.Ingredients.as_view(http_method_names=["put", "delete"]),
+    ),
 ]

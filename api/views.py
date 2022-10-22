@@ -77,36 +77,37 @@ class Orders(APIView):
         return self.save_object_if_valid(serializer)
 
 
-@api_view(["GET", "POST", "PUT", "DELETE"])
-def ingredient(request, id=""):
-    if request.method == "GET":
+class Ingredients(APIView):
+    def get_object_by_id(self, id):
+        try:
+            return Ingredient.objects.get(id=id)
+        except MenuItem.DoesNotExist:
+            raise Http404
+
+    def save_object_if_valid(self, serializer, good_status=status.HTTP_200_OK):
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=good_status)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request):
         ingredients = Ingredient.objects.all()
         serializer = IngredientSerializer(ingredients, many=True)
         return Response(serializer.data)
 
-    elif request.method == "POST":
+    def post(self, request):
         serializer = IngredientSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return self.save_object_if_valid(
+            serializer, good_status=status.HTTP_201_CREATED
+        )
 
-    elif request.method == "PUT":
-        try:
-            order = Ingredient.objects.get(id=id)
-        except Ingredient.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        serializer = OrderSerializer(order, request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def put(self, request, id):
+        ingredient = self.get_object_by_id(id)
+        serializer = IngredientSerializer(ingredient, request.data)
+        return self.save_object_if_valid(serializer)
 
-    elif request.method == "DELETE":
-        try:
-            ingredient = Ingredient.objects.get(id=id)
-        except Ingredient.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+    def delete(self, request, id):
+        ingredient = self.get_object_by_id(id)
         ingredient.delete()
         return Response(status.HTTP_204_NO_CONTENT)
 
