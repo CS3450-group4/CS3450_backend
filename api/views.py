@@ -1,7 +1,6 @@
 from django.http import Http404
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from base.models import MenuItem
 from .serializers import *
@@ -112,40 +111,36 @@ class Ingredients(APIView):
         return Response(status.HTTP_204_NO_CONTENT)
 
 
-@api_view(["GET", "PUT", "DELETE"])
-def user(request, id):
-    if request.method == "GET":
+class Users(APIView):
+    def get_object_by_id(self, id):
         try:
-            user = User.objects.get(id=id)
-        except User.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return User.objects.get(id=id)
+        except MenuItem.DoesNotExist:
+            raise Http404
+
+    def save_object_if_valid(self, serializer, good_status=status.HTTP_200_OK):
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=good_status)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request, id):
+        user = self.get_object_by_id(id)
         serializer = UserSerializer(user)
         return Response(serializer.data)
 
-    elif request.method == "PUT":
-        try:
-            user = User.objects.get(id=id)
-        except User.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+    def put(self, request, id):
+        user = self.get_object_by_id(id)
         serializer = UserSerializer(user, request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return self.save_object_if_valid(serializer)
 
-    elif request.method == "DELETE":
-        try:
-            user = User.objects.get(id=id)
-        except User.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+    def delete(self, request, id):
+        user = self.get_object_by_id(id)
         user.delete()
         return Response(status.HTTP_204_NO_CONTENT)
 
-
-@api_view(["POST"])
-def createUser(request):
-    serializer = UserSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request):
+        serializer = UserSerializer(data=request.data)
+        return self.save_object_if_valid(
+            serializer, good_status=status.HTTP_201_CREATED
+        )
