@@ -81,7 +81,7 @@ def ingredient(request, id=''):
         return Response(serializer.data)
 
     elif request.method == 'POST':
-        serializer = IngredientSerializer(request.data)
+        serializer = IngredientSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data,
@@ -94,7 +94,7 @@ def ingredient(request, id=''):
             order = Ingredient.objects.get(id=id)
         except Ingredient.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        serializer = OrderSerializer(order, request.data)
+        serializer = IngredientSerializer(order, request.data)
         if serializer.is_valid():
            serializer.save() 
            return Response(serializer.data)
@@ -154,3 +154,12 @@ def getAllUsers(request):
         users = User.objects.all()
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
+
+@api_view(['GET'])
+def getUserByEmail(request, name):
+    try:
+        user = User.objects.get(userName=name)
+    except User.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    seralizer = UserSerializer(user)
+    return Response(seralizer.data)

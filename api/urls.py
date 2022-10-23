@@ -8,6 +8,7 @@ urlpatterns = [
         path('orders/<int:id>/', views.getOrders),
         path('user/', views.createUser),
         path('user/all', views.getAllUsers),
+        path('userName/<str:name>/', views.getUserByEmail),
         path('user/<int:id>/', views.user),
         path('ingredient/', views.ingredient),
         path('ingredient/<int:id>/', views.ingredient),
