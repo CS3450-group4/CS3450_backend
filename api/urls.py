@@ -1,5 +1,4 @@
 from django.urls import path
-from rest_framework.authtoken import views as rest_views
 from . import views
 
 urlpatterns = [
@@ -20,5 +19,4 @@ urlpatterns = [
         "ingredient/<int:id>/",
         views.Ingredients.as_view(http_method_names=["put", "delete"]),
     ),
-    path("api-token-auth/", rest_views.obtain_auth_token),
 ]
