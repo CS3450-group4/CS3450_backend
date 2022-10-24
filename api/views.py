@@ -3,7 +3,18 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from base.models import MenuItem
+from django.contrib.auth.models import User
 from .serializers import *
+
+"""
+create login api endpoint
+check request.username and reqest.password
+authenticat with django.contrib.auth.authenticate
+if auth then dango.contrib.auth.login
+
+
+make logout endpoint
+"""
 
 
 class Menu(APIView):

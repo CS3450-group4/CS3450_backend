@@ -1,9 +1,10 @@
 from django.db import models
 
 
-class User(models.Model):
+class UserInfo(models.Model):
     def __str__(self):
         return self.userName
+
     authLevel = models.JSONField(default=dict)
     # TODO: look into hashing passwords
     password = models.CharField(max_length=255)
@@ -39,8 +40,7 @@ class Ingredient(models.Model):
 class Order(models.Model):
     price = models.PositiveIntegerField()
     created = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(UserInfo, on_delete=models.CASCADE)
     # TODO: set choices on orderStatus
     orderStatus = models.CharField(max_length=200, default="unfullfilled")
     ingredientList = models.JSONField(default=dict)
-
