@@ -12,9 +12,11 @@ class MenuItemSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    orders = serializers.PrimaryKeyRelatedField(many=True, queryset=Order.objects.all())
+
     class Meta:
         model = User
-        fields = "__all__"
+        fields = ["id", "username", "first_name", "last_name", "orders"]
 
 
 class IngredientSerializer(serializers.ModelSerializer):

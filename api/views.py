@@ -18,6 +18,30 @@ make logout endpoint
 """
 
 
+class Login(APIView):
+    def post(self, request):
+        if "username" in request.data and "password" in request.data:
+            username = request.data["username"]
+            password = request.data["password"]
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        # TODO: send 401 if not auth
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+        else:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+
+
+class Logout(APIView):
+    def post(self, request):
+        logout(request)
+        return Response()
+
+
 class Menu(APIView):
     def get_object_by_name(self, name):
         try:
@@ -32,6 +56,9 @@ class Menu(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, name=""):
+        user = authenticate(request, username="jimbo", password="testpass")
+        if user is not None:
+            login(request, user)
         # if _ then get all else get named menuItem
         if not name:
             menuItems = MenuItem.objects.all()

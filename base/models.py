@@ -40,7 +40,12 @@ class Ingredient(models.Model):
 class Order(models.Model):
     price = models.PositiveIntegerField()
     created = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(UserInfo, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        "auth.User", related_name="orders", on_delete=models.CASCADE
+    )
     # TODO: set choices on orderStatus
     orderStatus = models.CharField(max_length=200, default="unfullfilled")
     ingredientList = models.JSONField(default=dict)
+
+    class Meta:
+        ordering = ["created"]
