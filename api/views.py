@@ -2,6 +2,7 @@ from django.http import Http404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.decorators import api_view
 from base.models import MenuItem
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
@@ -183,3 +184,17 @@ class Users(APIView):
         return self.save_object_if_valid(
             serializer, good_status=status.HTTP_201_CREATED
         )
+@api_view(['GET'])
+def getAllUsers(request):
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
+
+@api_view(['GET'])
+def getUserByEmail(request, name):
+    try:
+        user = User.objects.get(userName=name)
+    except User.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    seralizer = UserSerializer(user)
+    return Response(seralizer.data)
