@@ -5,7 +5,7 @@ class UserInfo(models.Model):
     authLevel = models.JSONField(default=dict)
     user = models.OneToOneField("auth.User", on_delete=models.CASCADE)
     balance = models.IntegerField(default=0)
-    actingLevel = models.PositiveSmallIntegerField()
+    actingLevel = models.PositiveSmallIntegerField(default=0)
     hoursWorked = models.PositiveIntegerField(default=0)
 
 

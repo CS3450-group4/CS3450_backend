@@ -15,29 +15,30 @@ class MenuItemSerializer(serializers.ModelSerializer):
 class UserInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserInfo
-        fields = "__all__"
+        fields = ["authLevel", "balance", "actingLevel", "hoursWorked"]
 
 
 class UserSerializer(serializers.ModelSerializer):
-    orders = serializers.PrimaryKeyRelatedField(many=True, queryset=Order.objects.all())
     userinfo = UserInfoSerializer()
 
     class Meta:
         model = User
-        fields = ["id", "username", "first_name", "last_name", "orders", "userinfo"]
+        fields = ["id", "username", "first_name", "last_name", "userinfo"]
 
     def update(self, instance, validated_data):
         if validated_data.get("userinfo"):
             user_info_data = validated_data.pop("userinfo")
             userInfo = instance.userinfo
+
             if user_info_data.get("authLevel"):
                 userInfo.authLevel = user_info_data.get("authLevel")
-
+            if user_info_data.get("actingLevel"):
+                userInfo.actingLevel = user_info_data.get("actingLevel")
             if user_info_data.get("balance"):
                 userInfo.balance = user_info_data.get("balance")
-
             if user_info_data.get("hoursWorked"):
                 userInfo.hoursWorked = user_info_data.get("hoursWorked")
+
             userInfo.save()
 
         if validated_data.get("username"):
@@ -49,6 +50,13 @@ class UserSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+
+    def create(self, validated_data):
+        print("here")
+        userinfo = validated_data.pop("userinfo")
+        user = User.objects.create(**validated_data)
+        UserInfo.objects.create(user=user, **userinfo)
+        return user
 
 
 class IngredientSerializer(serializers.ModelSerializer):
