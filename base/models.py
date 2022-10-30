@@ -2,16 +2,11 @@ from django.db import models
 
 
 class UserInfo(models.Model):
-    def __str__(self):
-        return self.userName
-
     authLevel = models.JSONField(default=dict)
-    # TODO: look into hashing passwords
-    password = models.CharField(max_length=255)
-    userName = models.CharField(max_length=255)
-    balance = models.IntegerField()
+    user = models.OneToOneField("auth.User", on_delete=models.CASCADE)
+    balance = models.IntegerField(default=0)
     actingLevel = models.PositiveSmallIntegerField()
-    hoursWorked = models.PositiveIntegerField()
+    hoursWorked = models.PositiveIntegerField(default=0)
 
 
 class MenuItem(models.Model):
