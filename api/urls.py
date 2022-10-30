@@ -14,6 +14,7 @@ urlpatterns = [
         "user/<int:id>/",
         views.Users.as_view(http_method_names=["get", "put", "delete"]),
     ),
+    path("userinfo/<int:pk>/", views.getUserInfo),
     path("user/all", views.getAllUsers),
     path("userName/<str:name>/", views.getUserByEmail),
     path("ingredient/", views.Ingredients.as_view(http_method_names=["get", "post"])),

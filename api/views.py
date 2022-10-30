@@ -184,13 +184,27 @@ class Users(APIView):
         return self.save_object_if_valid(
             serializer, good_status=status.HTTP_201_CREATED
         )
-@api_view(['GET'])
-def getAllUsers(request):
-        users = User.objects.all()
-        serializer = UserSerializer(users, many=True)
-        return Response(serializer.data)
 
-@api_view(['GET'])
+
+@api_view(["GET"])
+def getUserInfo(request, pk):
+    try:
+        user = User.objects.get(pk=pk)
+    except User.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    info = UserInfo.objects.get(user=user)
+    serializer = UserInfoSerializer(info)
+    return Response(serializer.data)
+
+
+@api_view(["GET"])
+def getAllUsers(request):
+    users = User.objects.all()
+    serializer = UserSerializer(users, many=True)
+    return Response(serializer.data)
+
+
+@api_view(["GET"])
 def getUserByEmail(request, name):
     try:
         user = User.objects.get(userName=name)
