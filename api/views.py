@@ -185,13 +185,8 @@ class Users(LoginRequiredMixin, APIView):
 
 @login_required
 @api_view(["GET"])
-def getUserInfo(request, pk):
-    try:
-        user = User.objects.get(pk=pk)
-    except User.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    info = UserInfo.objects.get(user=user)
-    serializer = UserInfoSerializer(info)
+def self(request):
+    serializer = UserSerializer(request.user)
     return Response(serializer.data)
 
 
