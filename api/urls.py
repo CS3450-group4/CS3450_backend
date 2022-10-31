@@ -9,7 +9,7 @@ urlpatterns = [
     ),
     path("orders/", views.Orders.as_view(http_method_names=["get", "post"])),
     path("orders/<int:id>/", views.Orders.as_view(http_method_names=["put"])),
-    path("user/", views.Users.as_view(http_method_names=["post"])),
+    path("create_user/", views.create_user),
     path(
         "user/<int:id>/",
         views.Users.as_view(http_method_names=["get", "put", "delete"]),

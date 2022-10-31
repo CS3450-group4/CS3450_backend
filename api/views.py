@@ -38,7 +38,7 @@ class Login(APIView):
         return Response(serializer.data)
 
 
-class Logout(APIView):
+class Logout(LoginRequiredMixin, APIView):
     def post(self, request):
         logout(request)
         return Response()
@@ -176,11 +176,14 @@ class Users(LoginRequiredMixin, APIView):
         user.delete()
         return Response(status.HTTP_204_NO_CONTENT)
 
-    def post(self, request):
-        serializer = UserSerializer(data=request.data)
-        return self.save_object_if_valid(
-            serializer, good_status=status.HTTP_201_CREATED
-        )
+
+@api_view(["POST"])
+def create_user(request):
+    serializer = UserSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @login_required
