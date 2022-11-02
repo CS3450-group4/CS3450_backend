@@ -1,5 +1,4 @@
 from django.urls import path
-from rest_framework.authtoken import views as rest_views
 from . import views
 
 urlpatterns = [
@@ -10,11 +9,12 @@ urlpatterns = [
     ),
     path("orders/", views.Orders.as_view(http_method_names=["get", "post"])),
     path("orders/<int:id>/", views.Orders.as_view(http_method_names=["put"])),
-    path("user/", views.Users.as_view(http_method_names=["post"])),
+    path("create_user/", views.create_user),
     path(
         "user/<int:id>/",
         views.Users.as_view(http_method_names=["get", "put", "delete"]),
     ),
+    path("self/", views.self),
     path("user/all", views.getAllUsers),
     path("userName/<str:name>/", views.getUserByEmail),
     path("ingredient/", views.Ingredients.as_view(http_method_names=["get", "post"])),
@@ -22,5 +22,6 @@ urlpatterns = [
         "ingredient/<int:id>/",
         views.Ingredients.as_view(http_method_names=["put", "delete"]),
     ),
-    path("api-token-auth/", rest_views.obtain_auth_token),
+    path("login/", views.Login.as_view(http_method_names=["post"])),
+    path("logout/", views.Logout.as_view(http_method_names=["post"])),
 ]

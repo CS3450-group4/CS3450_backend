@@ -6,6 +6,8 @@ from rest_framework.decorators import api_view
 from base.models import MenuItem
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from .serializers import *
 
 """
@@ -19,7 +21,30 @@ make logout endpoint
 """
 
 
-class Menu(APIView):
+class Login(APIView):
+    def post(self, request):
+        if "username" in request.data and "password" in request.data:
+            username = request.data["username"]
+            password = request.data["password"]
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+        else:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+
+
+class Logout(LoginRequiredMixin, APIView):
+    def post(self, request):
+        logout(request)
+        return Response()
+
+
+class Menu(LoginRequiredMixin, APIView):
     def get_object_by_name(self, name):
         try:
             return MenuItem.objects.get(name=name)
@@ -33,7 +58,6 @@ class Menu(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, name=""):
-        # if _ then get all else get named menuItem
         if not name:
             menuItems = MenuItem.objects.all()
             serializer = MenuItemSerializer(menuItems, many=True)
@@ -62,7 +86,7 @@ class Menu(APIView):
         return Response(status.HTTP_204_NO_CONTENT)
 
 
-class Orders(APIView):
+class Orders(LoginRequiredMixin, APIView):
     def save_object_if_valid(self, serializer, good_status=status.HTTP_200_OK):
         if serializer.is_valid():
             serializer.save()
@@ -89,7 +113,7 @@ class Orders(APIView):
         return self.save_object_if_valid(serializer)
 
 
-class Ingredients(APIView):
+class Ingredients(LoginRequiredMixin, APIView):
     def get_object_by_id(self, id):
         try:
             return Ingredient.objects.get(id=id)
@@ -124,7 +148,7 @@ class Ingredients(APIView):
         return Response(status.HTTP_204_NO_CONTENT)
 
 
-class Users(APIView):
+class Users(LoginRequiredMixin, APIView):
     def get_object_by_id(self, id):
         try:
             return User.objects.get(id=id)
@@ -152,18 +176,33 @@ class Users(APIView):
         user.delete()
         return Response(status.HTTP_204_NO_CONTENT)
 
-    def post(self, request):
-        serializer = UserSerializer(data=request.data)
-        return self.save_object_if_valid(
-            serializer, good_status=status.HTTP_201_CREATED
-        )
-@api_view(['GET'])
-def getAllUsers(request):
-        users = User.objects.all()
-        serializer = UserSerializer(users, many=True)
-        return Response(serializer.data)
 
-@api_view(['GET'])
+@api_view(["POST"])
+def create_user(request):
+    serializer = UserSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@login_required
+@api_view(["GET"])
+def self(request):
+    serializer = UserSerializer(request.user)
+    return Response(serializer.data)
+
+
+@login_required
+@api_view(["GET"])
+def getAllUsers(request):
+    users = User.objects.all()
+    serializer = UserSerializer(users, many=True)
+    return Response(serializer.data)
+
+
+@login_required
+@api_view(["GET"])
 def getUserByEmail(request, name):
     try:
         user = User.objects.get(userName=name)
