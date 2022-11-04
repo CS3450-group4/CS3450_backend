@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from base.models import MenuItem
 from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
 from base.models import Ingredient
 from base.models import Order
 from base.models import UserInfo
@@ -23,7 +24,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "username", "first_name", "last_name", "userinfo"]
+        fields = ["id", "username", "password", "first_name", "last_name", "userinfo"]
+        extra_kwargs = {"password": {"write_only": True}}
 
     def update(self, instance, validated_data):
         if validated_data.get("userinfo"):
@@ -53,7 +55,11 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         userinfo = validated_data.pop("userinfo")
-        user = User.objects.create(**validated_data)
+        password = validated_data.pop("password")
+
+        user = User(**validated_data)
+        user.set_password(password)
+        user.save()
         UserInfo.objects.create(user=user, **userinfo)
         return user
 
