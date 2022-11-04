@@ -205,7 +205,7 @@ def getAllUsers(request):
 @api_view(["GET"])
 def getUserByEmail(request, name):
     try:
-        user = User.objects.get(userName=name)
+        user = User.objects.get(username=name)
     except User.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     seralizer = UserSerializer(user)
