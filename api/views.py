@@ -96,7 +96,8 @@ class Orders(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request):
-        orders = Order.objects.filter(orderStatus="unfullfilled")
+        # orders = Order.objects.filter(orderStatus="unfullfilled")
+        orders = Order.objects
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
 
@@ -188,21 +189,21 @@ def create_user(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@login_required
+# @login_required
 @api_view(["GET"])
 def self(request):
     serializer = UserSerializer(request.user)
     return Response(serializer.data)
 
 
-@api_view(["GET"])
+# @api_view(["GET"])
 def getAllUsers(request):
     users = User.objects.all()
     serializer = UserSerializer(users, many=True)
     return Response(serializer.data)
 
 
-@login_required
+# @login_required
 @api_view(["GET"])
 def getUserByEmail(request, name):
     try:
