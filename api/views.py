@@ -189,21 +189,19 @@ def create_user(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# @login_required
 @api_view(["GET"])
 def self(request):
     serializer = UserSerializer(request.user)
     return Response(serializer.data)
 
 
-# @api_view(["GET"])
+@api_view(["GET"])
 def getAllUsers(request):
     users = User.objects.all()
     serializer = UserSerializer(users, many=True)
     return Response(serializer.data)
 
 
-# @login_required
 @api_view(["GET"])
 def getUserByEmail(request, name):
     try:
