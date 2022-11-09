@@ -96,7 +96,8 @@ class Orders(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request):
-        orders = Order.objects.filter(orderStatus="unfullfilled")
+        # orders = Order.objects.filter(orderStatus="unfullfilled")
+        orders = Order.objects
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
 
@@ -215,7 +216,6 @@ def pay_all_employees(request):
     return Response(
         UserInfoSerializer(manager).data, status=status.HTTP_206_PARTIAL_CONTENT
     )
-
 
 @api_view(["GET"])
 def self(request):
