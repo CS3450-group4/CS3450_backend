@@ -2,12 +2,12 @@ from django.http import Http404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.authtoken.models import Token
+from rest_framework.permissions import AllowAny
 from base.models import MenuItem
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
 from .serializers import *
 
 """
@@ -22,22 +22,28 @@ make logout endpoint
 
 
 class Login(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         if "username" in request.data and "password" in request.data:
             username = request.data["username"]
             password = request.data["password"]
         else:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Please provdie a username and password"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        print(username)
-        print(password)
         user = authenticate(request, username=username, password=password)
         if user is not None:
+            token, _ = Token.objects.get_or_create(user=user)
             login(request, user)
         else:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
-        serializer = UserSerializer(user)
-        return Response(serializer.data)
+        serial = UserSerializer(user)
+        return Response(
+            {"user": serial.data, "token": token.key}, status=status.HTTP_200_OK
+        )
 
 
 class Logout(APIView):
@@ -180,6 +186,7 @@ class Users(APIView):
 
 
 @api_view(["POST"])
+@permission_classes([AllowAny])
 def create_user(request):
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
