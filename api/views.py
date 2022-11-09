@@ -96,7 +96,8 @@ class Orders(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request):
-        orders = Order.objects.filter(orderStatus="unfullfilled")
+        # orders = Order.objects.filter(orderStatus="unfullfilled")
+        orders = Order.objects
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
 
@@ -186,7 +187,6 @@ def create_user(request):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 @api_view(["GET"])
