@@ -189,6 +189,34 @@ def create_user(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(["PUT"])
+def pay_all_employees(request):
+    userinfo = UserInfo.objects.all()
+    manager = userinfo[0]
+    totalPaid = 0
+    for info in userinfo:
+        isemployee = False
+        for i in range(len(info.authLevel)):
+            authLevel = info.authLevel[i]
+            if authLevel == 1 or authLevel == 2:
+                isemployee = True
+            if authLevel == 3:
+                manager = info
+                isemployee = False
+                break
+        if isemployee:
+            info.balance += info.hoursWorked * request.data["payrate"]
+            totalPaid += info.hoursWorked * request.data["payrate"]
+            info.hoursWorked = 0
+            info.save()
+
+    manager.balance -= totalPaid
+    manager.save()
+
+    return Response(
+        UserInfoSerializer(manager).data, status=status.HTTP_206_PARTIAL_CONTENT
+    )
+
 @api_view(["GET"])
 def self(request):
     serializer = UserSerializer(request.user)

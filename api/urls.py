@@ -22,6 +22,7 @@ urlpatterns = [
         "ingredient/<int:id>/",
         views.Ingredients.as_view(http_method_names=["put", "delete"]),
     ),
+    path("payemployees/", views.pay_all_employees),
     path("login/", views.Login.as_view(http_method_names=["post"])),
     path("logout/", views.Logout.as_view(http_method_names=["post"])),
 ]
