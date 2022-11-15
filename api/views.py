@@ -103,7 +103,7 @@ class Orders(APIView):
 
     def get(self, request):
         # orders = Order.objects.filter(orderStatus="unfullfilled")
-        orders = Order.objects
+        orders = Order.objects.all()
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
 
@@ -126,7 +126,7 @@ class Ingredients(APIView):
     def get_object_by_id(self, id):
         try:
             return Ingredient.objects.get(id=id)
-        except MenuItem.DoesNotExist:
+        except Ingredient.DoesNotExist:
             raise Http404
 
     def save_object_if_valid(self, serializer, good_status=status.HTTP_200_OK):
@@ -197,6 +197,40 @@ def create_user(request):
 
 
 @api_view(["PUT"])
+def fullfillOrder(request, id):
+    order = Order.objects.get(id=id)
+    ingredientsArray = []
+    for value in order.ingredientList.values():
+        ingredientsArray += value
+
+    for ingred in ingredientsArray:
+        try:
+            ingredient = Ingredient.objects.get(id=ingred["id"])
+        except Ingredient.DoesNotExist:
+            return Response(
+                {"error": f"ingredient '{ingred.name}' does not exist"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        if ingredient.stock >= ingred["options"]:
+            ingredient.stock -= ingred["options"]
+            ingredient.save()
+        else:
+            return Response(
+                {"error": f"Insufficient stock for ingredient '{ingred['name']}'"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+    order.orderStatus = "fullfilled"
+    order.save()
+    return Response(OrderSerializer(order).data, status=status.HTTP_200_OK)
+
+    # get all ingrediets in the order
+    # check if all ingredients are valid
+    # reduce stock on all ingredients
+    # set order status to fullfilled
+
+
+@api_view(["PUT"])
 def pay_all_employees(request):
     userinfo = UserInfo.objects.all()
     manager = userinfo[0]
@@ -223,6 +257,7 @@ def pay_all_employees(request):
     return Response(
         UserInfoSerializer(manager).data, status=status.HTTP_206_PARTIAL_CONTENT
     )
+
 
 @api_view(["GET"])
 def self(request):
