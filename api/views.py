@@ -224,6 +224,7 @@ def pay_all_employees(request):
         UserInfoSerializer(manager).data, status=status.HTTP_206_PARTIAL_CONTENT
     )
 
+
 @api_view(["GET"])
 def self(request):
     serializer = UserSerializer(request.user)
