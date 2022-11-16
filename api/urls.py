@@ -15,7 +15,7 @@ urlpatterns = [
         views.Users.as_view(http_method_names=["get", "put", "delete"]),
     ),
     path("self/", views.self),
-    path("user/all", views.getAllUsers),
+    path("user/all/", views.getAllUsers),
     path("userName/<str:name>/", views.getUserByEmail),
     path("ingredient/", views.Ingredients.as_view(http_method_names=["get", "post"])),
     path(
@@ -25,4 +25,5 @@ urlpatterns = [
     path("payemployees/", views.pay_all_employees),
     path("login/", views.Login.as_view(http_method_names=["post"])),
     path("logout/", views.Logout.as_view(http_method_names=["post"])),
+    path("fullfillorder/<int:id>/", views.fullfillOrder),
 ]
