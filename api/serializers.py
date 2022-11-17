@@ -31,16 +31,15 @@ class UserSerializer(serializers.ModelSerializer):
         if validated_data.get("userinfo"):
             user_info_data = validated_data.pop("userinfo")
             userInfo = instance.userinfo
-
-            if user_info_data.get("authLevel"):
-                userInfo.authLevel = user_info_data.get("authLevel")
-            if user_info_data.get("actingLevel"):
-                userInfo.actingLevel = user_info_data.get("actingLevel")
-            if user_info_data.get("balance"):
-                userInfo.balance = user_info_data.get("balance")
-            if user_info_data.get("hoursWorked"):
-                userInfo.hoursWorked = user_info_data.get("hoursWorked")
-
+            for key, value in user_info_data.items():
+                if key == "authLevel":
+                    userInfo.authLevel = value
+                elif key == "actingLevel":
+                    userInfo.actingLevel = value
+                elif key == "balance":
+                    userInfo.balance = value
+                elif key == "hoursWorked":
+                    userInfo.balance = value
             userInfo.save()
 
         if validated_data.get("username"):
